@@ -1,0 +1,17 @@
+John Doe is a Python developer with over 1 year of experience in backend development and data engineering.
+
+Skills:
+- Python
+- SQL
+- PostgreSQL
+- REST APIs
+- Pandas, NumPy
+- Data Cleaning
+- Git & GitHub
+- Deployment on Heroku
+
+Work Experience:
+Worked on building APIs using Flask for a document processing system. Handled data migration between MSSQL and PostgreSQL using Python scripts. Built basic ML models for classification tasks.
+
+Education:
+B.Tech in Computer Science

@@ -1,0 +1,14 @@
+We are looking for a Python Developer with hands-on experience in building web applications and working with data pipelines.
+
+Requirements:
+- Strong knowledge of Python and object-oriented programming
+- Experience with REST API development (Flask/Django)
+- Familiarity with relational databases like PostgreSQL or MySQL
+- Ability to work with large datasets and perform data cleaning
+- Exposure to machine learning libraries like scikit-learn
+- Version control using Git
+- Basic understanding of cloud platforms (AWS or Heroku)
+
+Good to Have:
+- Experience with Docker and CI/CD
+- NLP or text classification experience
