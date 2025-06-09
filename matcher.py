@@ -1,12 +1,14 @@
 import spacy
 import json
+from rapidfuzz import fuzz
 
 # Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
-# Load skills list from JSON
+# Load skills and weights from one JSON file
 with open("skills_list.json", "r", encoding="utf-8") as f:
-    SKILLS_LIST = set(json.load(f))
+    SKILLS_DICT = json.load(f)
+    SKILLS_LIST = set(SKILLS_DICT.keys())
 
 CUSTOM_STOP_WORDS = {"experience", "ability", "development", "work", "project", "team"}
 
@@ -19,31 +21,53 @@ def extract_keywords(text):
     for chunk in noun_chunks:
         chunk_doc = nlp(chunk)
         lemmatized = " ".join([token.lemma_ for token in chunk_doc if not token.is_stop])
-        if lemmatized and lemmatized in SKILLS_LIST and lemmatized not in CUSTOM_STOP_WORDS:
+        if lemmatized and lemmatized in SKILLS_LIST:
             keywords.append(lemmatized)
 
     for token in doc:
-        if token.lemma_ in SKILLS_LIST and token.lemma_ not in CUSTOM_STOP_WORDS:
+        if token.lemma_ in SKILLS_LIST:
             keywords.append(token.lemma_)
 
     return list(set(keywords))
+
 
 def match_keywords(jd_keywords, resume_keywords):
     jd_keywords = set([kw.strip().lower() for kw in jd_keywords])
     resume_keywords = set([kw.strip().lower() for kw in resume_keywords])
 
-    matched = jd_keywords & resume_keywords
-    missing = jd_keywords - resume_keywords
+    matched = set()
+    missing = set()
+    weighted_score = 0
+    max_score = 0
+    FUZZY_THRESHOLD = 85
 
-    score = (len(matched) / len(jd_keywords)) * 100 if jd_keywords else 0
+    for jd_kw in jd_keywords:
+        weight = SKILLS_DICT.get(jd_kw, 1)
+        max_score += weight
+        found_match = False
+
+        for resume_kw in resume_keywords:
+            if jd_kw == resume_kw or fuzz.token_sort_ratio(jd_kw, resume_kw) >= FUZZY_THRESHOLD:
+                matched.add(jd_kw)
+                weighted_score += weight
+                found_match = True
+                break
+
+        if not found_match:
+            missing.add(jd_kw)
+
+    score_percent = (weighted_score / max_score * 100) if max_score > 0 else 0
 
     return {
         "matched": sorted(matched),
         "missing": sorted(missing),
-        "match_score": round(score, 2),
+        "match_score": round(score_percent, 2),
         "total_keywords_in_jd": len(jd_keywords),
-        "total_matched": len(matched)
+        "total_matched": len(matched),
+        "weighted_score": weighted_score,
+        "max_possible_score": max_score
     }
+
 
 def main():
     with open("job_description.txt", "r", encoding="utf-8") as jd_file:
