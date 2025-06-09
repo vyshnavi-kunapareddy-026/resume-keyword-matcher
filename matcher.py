@@ -29,10 +29,21 @@ def extract_keywords(text):
     return list(set(keywords))
 
 def match_keywords(jd_keywords, resume_keywords):
-    matched = set(jd_keywords) & set(resume_keywords)
-    missing = set(jd_keywords) - set(resume_keywords)
+    jd_keywords = set([kw.strip().lower() for kw in jd_keywords])
+    resume_keywords = set([kw.strip().lower() for kw in resume_keywords])
+
+    matched = jd_keywords & resume_keywords
+    missing = jd_keywords - resume_keywords
+
     score = (len(matched) / len(jd_keywords)) * 100 if jd_keywords else 0
-    return matched, missing, round(score, 2)
+
+    return {
+        "matched": sorted(matched),
+        "missing": sorted(missing),
+        "match_score": round(score, 2),
+        "total_keywords_in_jd": len(jd_keywords),
+        "total_matched": len(matched)
+    }
 
 def main():
     with open("job_description.txt", "r", encoding="utf-8") as jd_file:
@@ -44,11 +55,16 @@ def main():
     jd_keywords = extract_keywords(jd_text)
     resume_keywords = extract_keywords(resume_text)
 
-    matched, missing, score = match_keywords(jd_keywords, resume_keywords)
+    matched_result = match_keywords(jd_keywords, resume_keywords)
+    matched = matched_result["matched"]
+    missing = matched_result["missing"]
+    score = matched_result["match_score"]
 
     print("\nMatch Score:", score, "%")
     print("\nMatched Keywords:", matched)
     print("\nMissing Keywords:", missing)
+    print(f"\nMatched keywords in job description {matched_result['total_matched']} out of {matched_result['total_keywords_in_jd']} total keywords.")
+    print("\nTotal Keywords in Job Description:", matched_result['total_keywords_in_jd'])
 
 if __name__ == "__main__":
     main()
